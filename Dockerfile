@@ -29,7 +29,7 @@ RUN make && make install
 
 
 # 复制配置文件
-RUN cp support-files/my-medium.cnf /etc/my.cnf
+RUN cp support-files/my-large.cnf /etc/my.cnf
 
 # 配置开机自启动
 RUN cp support-files/mysql.server /etc/init.d/mysqld
@@ -43,7 +43,7 @@ RUN /usr/local/mysql/scripts/mysql_install_db --user=mysql --basedir=/usr/local/
 
 RUN /etc/init.d/mysqld start && /usr/local/mysql/bin/mysqladmin -u root password 'f1zzb4ck' &&  /usr/local/mysql/bin/mysql -u root -pf1zzb4ck -e "create user 'readonly'@'%' identified by 'readonly';grant select on *.* to 'readonly'@'%' identified by 'readonly';flush privileges;\q;"
 
-RUN cd /root
+WORKDIR root
 RUN rm -rf mysql-5.5.53
 
 EXPOSE 3306  
