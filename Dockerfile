@@ -27,7 +27,6 @@ WORKDIR mysql-5.5.53
 RUN cmake -DCMAKE_INSTALL_PREFIX=/usr/local/mysql 
 RUN make && make install
 
-
 # 复制配置文件
 RUN cp support-files/my-large.cnf /etc/my.cnf
 
@@ -46,9 +45,15 @@ RUN /etc/init.d/mysqld start && /usr/local/mysql/bin/mysqladmin -u root password
 WORKDIR root
 RUN rm -rf mysql-5.5.53
 
+#install supervisor and rsyslog
+RUN rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+RUN yum -y install rsyslog supervisor
+#
+ADD supervisord.conf /etc/supervisord.conf
+
 EXPOSE 3306  
    
-CMD ["/usr/local/mysql/bin/mysqld_safe"]
-
+#CMD ["/usr/local/mysql/bin/mysqld_safe"]
+CMD ["/usr/bin/supervisord"]
 #CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
 
