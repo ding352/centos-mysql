@@ -15,6 +15,7 @@ RUN yum -y install gcc gcc-c++ ncurses-devel
 
 #创建mysql安装目录及数据目录
 RUN mkdir -p /usr/local/mysql
+RUN mkdir -p /usr/local/mysql/logs
 
 #创建用户和用户组与赋予数据存放目录权限
 RUN groupadd mysql
@@ -28,7 +29,7 @@ RUN cmake -DCMAKE_INSTALL_PREFIX=/usr/local/mysql
 RUN make && make install
 
 # 复制配置文件
-RUN cp support-files/my-large.cnf /etc/my.cnf
+ADD  my.cnf /etc/my.cnf
 
 # 配置开机自启动
 RUN cp support-files/mysql.server /etc/init.d/mysqld
@@ -40,7 +41,7 @@ RUN chmod +x /etc/init.d/mysqld
 # 初始化数据库
 RUN /usr/local/mysql/scripts/mysql_install_db --user=mysql --basedir=/usr/local/mysql --datadir=/usr/local/mysql/data
 
-RUN /etc/init.d/mysqld start && /usr/local/mysql/bin/mysqladmin -u root password 'f1zzb4ck' &&  /usr/local/mysql/bin/mysql -u root -pf1zzb4ck -e "create user 'readonly'@'%' identified by 'readonly';grant select on *.* to 'readonly'@'%' identified by 'readonly';flush privileges;\q;"
+RUN /etc/init.d/mysqld start && /usr/local/mysql/bin/mysqladmin -u root password 'f1zzb4ck' &&  /usr/local/mysql/bin/mysql -u root -pf1zzb4ck -e "create user 'haproxy'@'%';grant usage on *.* to 'haproxy'@'%';flush privileges;\q;"
 
 WORKDIR root
 RUN rm -rf mysql-5.5.53
@@ -48,7 +49,6 @@ RUN rm -rf mysql-5.5.53
 #install supervisor and rsyslog
 RUN rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
 RUN yum -y install rsyslog supervisor
-#
 ADD supervisord.conf /etc/supervisord.conf
 
 EXPOSE 3306  
